@@ -30,6 +30,22 @@ st.set_page_config(
 
 PALETTE = ["#287C76", "#D66A47", "#E0A72F", "#6E5B9A", "#4E8AC8", "#7A8B3A"]
 
+SOURCE_LINKS = {
+    "Portal de Dados Abertos da ANEEL": "https://dadosabertos.aneel.gov.br/",
+    "Ocorrências Emergenciais nas Redes de Distribuição": (
+        "https://dadosabertos.aneel.gov.br/dataset/"
+        "ocorrencias-emergenciais-nas-redes-de-distribuicao"
+    ),
+    "Interrupções de Energia Elétrica nas Redes de Distribuição": (
+        "https://dadosabertos.aneel.gov.br/dataset/"
+        "interrupcoes-de-energia-eletrica-nas-redes-de-distribuicao"
+    ),
+    "Relatórios e Indicadores de Distribuição da ANEEL": (
+        "https://www.gov.br/aneel/pt-br/centrais-de-conteudos/"
+        "relatorios-e-indicadores/distribuicao"
+    ),
+}
+
 
 @st.cache_data(ttl=60 * 60, show_spinner=False)
 def cached_regional_summary(year: int, ufs: tuple[str, ...]) -> pd.DataFrame:
@@ -337,6 +353,75 @@ def render_insights(summary: pd.DataFrame, agents: pd.DataFrame) -> None:
         st.markdown(f"- {bullet}")
 
 
+def render_about_tab() -> None:
+    st.subheader("O que este dashboard mostra")
+    st.markdown(
+        """
+        Este MVP acompanha problemas de fornecimento de energia nas redes de distribuição
+        usando dados públicos da ANEEL. A leitura principal é regional: onde há mais
+        ocorrências, quais UFs aparecem no topo, quais causas foram declaradas e quais
+        distribuidoras concentram mais registros no recorte escolhido.
+
+        O painel não mede diretamente percepção de consumidores nem substitui uma
+        apuração jornalística local. Ele organiza bases regulatórias declaradas e
+        publicadas pela ANEEL, úteis para achar padrões, comparar regiões e levantar
+        perguntas melhores.
+        """
+    )
+
+    st.subheader("O que está disponível no painel")
+    st.markdown(
+        """
+        - **Filtros laterais:** ano, região e UF. A base de ocorrências cobre 2017 a 2026.
+        - **KPIs do topo:** total de ocorrências, UFs, municípios, distribuidoras,
+          percentual de registros não programados e tempo médio estimado de atendimento.
+        - **Mapa regional:** bolhas por UF, coloridas por região, com volume de ocorrências.
+        - **Leitura rápida:** destaques automáticos do recorte selecionado.
+        - **Ranking por região:** compara o volume de ocorrências entre Norte, Nordeste,
+          Centro-Oeste, Sudeste e Sul.
+        - **Ranking de causas:** mostra os principais grupos de causa declarados.
+        - **Tendência mensal:** evolução das ocorrências ao longo dos meses do ano.
+        - **Distribuidoras:** ranking das empresas com mais ocorrências e seus tempos
+          médios de preparo, deslocamento e execução.
+        - **Causas técnicas:** treemap da base de interrupções por tipo e causa.
+        - **Dados:** tabelas agregadas para exportar, copiar ou auditar os números.
+        """
+    )
+
+    st.subheader("Como os dados são tratados")
+    st.markdown(
+        """
+        A base principal é **Ocorrências Emergenciais nas Redes de Distribuição**. Ela
+        tem município via `CodIBGE`, então o app converte o prefixo do código IBGE em
+        UF e região. O campo `DscOcorrenciaAberta` é separado em origem, programação
+        e grupo de causa. Os tempos médios são calculados com `MdaPreparo`,
+        `MdaDeslocamento` e `MdaExecucao`, quando esses campos estão preenchidos.
+
+        A base **Interrupções de Energia Elétrica nas Redes de Distribuição** é usada
+        como complemento para causas técnicas. Ela é boa para entender tipo e fato
+        gerador da interrupção, mas a versão usada no MVP não é a base principal do
+        mapa regional porque não traz UF diretamente.
+        """
+    )
+
+    st.subheader("Fontes oficiais")
+    for label, url in SOURCE_LINKS.items():
+        st.markdown(f"- [{label}]({url})")
+
+    st.subheader("Limitações importantes")
+    st.markdown(
+        """
+        - Os dados são declarados pelas distribuidoras e publicados pela ANEEL.
+        - Alguns anos têm arquivos muito grandes; a primeira consulta pode demorar.
+        - O app usa cache de uma hora para não consultar a API em toda interação.
+        - A leitura por UF/região é derivada do código IBGE do município.
+        - Volumes de ocorrências não devem ser lidos isoladamente como qualidade
+          absoluta do serviço; população atendida, extensão da rede, clima e densidade
+          regional também importam.
+        """
+    )
+
+
 def main() -> None:
     st.title("Radar ANEEL de Quedas de Energia")
     st.caption(
@@ -387,8 +472,8 @@ def main() -> None:
 
     metric_row(summary)
 
-    tab_overview, tab_agents, tab_interruptions, tab_data = st.tabs(
-        ["Mapa regional", "Distribuidoras", "Causas técnicas", "Dados"]
+    tab_overview, tab_agents, tab_interruptions, tab_data, tab_about = st.tabs(
+        ["Mapa regional", "Distribuidoras", "Causas técnicas", "Dados", "Sobre e fontes"]
     )
     with tab_overview:
         left, right = st.columns([1.25, 0.75])
@@ -423,6 +508,9 @@ def main() -> None:
             hide_index=True,
             width="stretch",
         )
+
+    with tab_about:
+        render_about_tab()
 
 
 if __name__ == "__main__":
