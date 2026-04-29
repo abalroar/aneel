@@ -357,50 +357,38 @@ def render_about_tab() -> None:
     st.subheader("O que este dashboard mostra")
     st.markdown(
         """
-        Este MVP acompanha problemas de fornecimento de energia nas redes de distribuição
-        usando dados públicos da ANEEL. A leitura principal é regional: onde há mais
-        ocorrências, quais UFs aparecem no topo, quais causas foram declaradas e quais
-        distribuidoras concentram mais registros no recorte escolhido.
-
-        O painel não mede diretamente percepção de consumidores nem substitui uma
-        apuração jornalística local. Ele organiza bases regulatórias declaradas e
-        publicadas pela ANEEL, úteis para achar padrões, comparar regiões e levantar
-        perguntas melhores.
+        Painel com dados públicos da ANEEL sobre ocorrências emergenciais e
+        interrupções nas redes de distribuição de energia. Ele mostra os registros por
+        ano, região, UF, distribuidora, mês e causa informada.
         """
     )
 
     st.subheader("O que está disponível no painel")
     st.markdown(
         """
-        - **Filtros laterais:** ano, região e UF. A base de ocorrências cobre 2017 a 2026.
-        - **KPIs do topo:** total de ocorrências, UFs, municípios, distribuidoras,
-          percentual de registros não programados e tempo médio estimado de atendimento.
-        - **Mapa regional:** bolhas por UF, coloridas por região, com volume de ocorrências.
-        - **Leitura rápida:** destaques automáticos do recorte selecionado.
-        - **Ranking por região:** compara o volume de ocorrências entre Norte, Nordeste,
-          Centro-Oeste, Sudeste e Sul.
-        - **Ranking de causas:** mostra os principais grupos de causa declarados.
-        - **Tendência mensal:** evolução das ocorrências ao longo dos meses do ano.
-        - **Distribuidoras:** ranking das empresas com mais ocorrências e seus tempos
-          médios de preparo, deslocamento e execução.
-        - **Causas técnicas:** treemap da base de interrupções por tipo e causa.
-        - **Dados:** tabelas agregadas para exportar, copiar ou auditar os números.
+        - **Filtros:** ano, região e UF.
+        - **Indicadores:** ocorrências, UFs, municípios, distribuidoras, percentual de
+          ocorrências não programadas e tempo médio de atendimento.
+        - **Mapa:** volume de ocorrências por UF.
+        - **Regiões:** ranking de ocorrências por região.
+        - **Causas:** principais grupos de causa informados pelas distribuidoras.
+        - **Série mensal:** evolução das ocorrências no ano selecionado.
+        - **Distribuidoras:** ranking por volume de ocorrências e tempos médios.
+        - **Causas técnicas:** visão da base de interrupções por tipo e causa.
+        - **Dados:** tabelas agregadas usadas nos gráficos.
         """
     )
 
     st.subheader("Como os dados são tratados")
     st.markdown(
         """
-        A base principal é **Ocorrências Emergenciais nas Redes de Distribuição**. Ela
-        tem município via `CodIBGE`, então o app converte o prefixo do código IBGE em
-        UF e região. O campo `DscOcorrenciaAberta` é separado em origem, programação
-        e grupo de causa. Os tempos médios são calculados com `MdaPreparo`,
-        `MdaDeslocamento` e `MdaExecucao`, quando esses campos estão preenchidos.
+        A base principal é **Ocorrências Emergenciais nas Redes de Distribuição**.
+        O app usa o `CodIBGE` para identificar UF e região. O campo
+        `DscOcorrenciaAberta` é separado em origem, programação e grupo de causa.
+        Os tempos médios usam `MdaPreparo`, `MdaDeslocamento` e `MdaExecucao`.
 
-        A base **Interrupções de Energia Elétrica nas Redes de Distribuição** é usada
-        como complemento para causas técnicas. Ela é boa para entender tipo e fato
-        gerador da interrupção, mas a versão usada no MVP não é a base principal do
-        mapa regional porque não traz UF diretamente.
+        A base **Interrupções de Energia Elétrica nas Redes de Distribuição** aparece
+        na aba de causas técnicas, com tipo e fato gerador da interrupção.
         """
     )
 
@@ -412,12 +400,11 @@ def render_about_tab() -> None:
     st.markdown(
         """
         - Os dados são declarados pelas distribuidoras e publicados pela ANEEL.
-        - Alguns anos têm arquivos muito grandes; a primeira consulta pode demorar.
-        - O app usa cache de uma hora para não consultar a API em toda interação.
-        - A leitura por UF/região é derivada do código IBGE do município.
-        - Volumes de ocorrências não devem ser lidos isoladamente como qualidade
-          absoluta do serviço; população atendida, extensão da rede, clima e densidade
-          regional também importam.
+        - Alguns anos têm arquivos grandes; a primeira consulta pode demorar.
+        - O app usa cache de uma hora.
+        - A região e a UF são derivadas do código IBGE do município.
+        - O volume de ocorrências deve ser lido junto com contexto local, como tamanho
+          da rede, número de consumidores e eventos climáticos.
         """
     )
 
